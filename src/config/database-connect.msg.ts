@@ -1,5 +1,6 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
+import { configVariables } from '@shared';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit {
@@ -12,17 +13,18 @@ export class DatabaseService implements OnModuleInit {
       if (!this.dataSource.isInitialized) {
         await this.dataSource.initialize();
       }
-      this.logger.log(`Connected to ${process.env.DB_NAME} database`);
+
+      await this.dataSource.query('SELECT 1');
+
+      this.logger.log(
+        `Connected to database: ${configVariables.database.name}`,
+      );
     } catch (error) {
-      if (error instanceof Error) {
-        this.logger.error(
-          `Failed to connect to ${process.env.DB_NAME} database: ${error.message}`,
-        );
-      } else {
-        this.logger.error(
-          `Failed to connect to ${process.env.DB_NAME} database: ${String(error)}`,
-        );
-      }
+      this.logger.error(
+        `Failed to connect to database: ${configVariables.database.name}`,
+      );
+      this.logger.error(error);
+
       throw error;
     }
   }

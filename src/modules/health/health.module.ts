@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { HealthService } from './health.service';
 import { HealthController } from './health.controller';
-import { LoggerModule } from '@modules/logger';
+import { LoggerModule } from '@shared';
 
 @Module({
   imports: [LoggerModule],

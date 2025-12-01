@@ -18,7 +18,6 @@ export class HealthService {
   async check(): Promise<HealthResponseDto> {
     const timestamp = new Date().toISOString();
 
-    // Start all components as UNAVAILABLE by default
     const components: Record<string, HealthComponentStatusDto> = {
       database: { status: EHealthCheck.UNAVAILABLE },
       cpu: { status: EHealthCheck.UNAVAILABLE },
@@ -26,61 +25,52 @@ export class HealthService {
     };
 
     try {
-      // Database health
-      try {
-        await this.dataSource.query('SELECT 1');
-        components.database.status = EHealthCheck.UP;
-      } catch {
-        components.database.status = EHealthCheck.DOWN;
-      }
+      components.database.status = await this.checkDatabase();
+      components.cpu.status = await this.checkCpu();
+      components.memory.status = await this.checkMemory();
 
-      // CPU health
-      try {
-        const cpuLoad = await si.currentLoad();
-        components.cpu.status =
-          cpuLoad.currentLoad < 90 ? EHealthCheck.UP : EHealthCheck.DOWN;
-      } catch {
-        components.cpu.status = EHealthCheck.DOWN;
-      }
-
-      // Memory health
-      try {
-        const mem = await si.mem();
-        components.memory.status =
-          mem.free > 100 * 1024 * 1024 ? EHealthCheck.UP : EHealthCheck.DOWN;
-      } catch {
-        components.memory.status = EHealthCheck.DOWN;
-      }
-
-      // Overall system status
-      const status = Object.values(components).some(
-        (c) =>
-          c.status === EHealthCheck.DOWN ||
-          c.status === EHealthCheck.UNAVAILABLE,
+      const status = Object.values(components).every(
+        (c) => c.status === EHealthCheck.UP,
       )
-        ? EHealthCheck.DOWN
-        : EHealthCheck.UP;
+        ? EHealthCheck.UP
+        : EHealthCheck.DOWN;
 
       this.logger.info('Health check performed', { status, components });
+
       return { status, timestamp, components };
-    } catch (err: unknown) {
-      const errorInfo: { message: string; stack?: string } =
-        err instanceof Error
-          ? { message: err.message, stack: err.stack }
-          : { message: JSON.stringify(err) };
-
-      this.logger.error('Health check failed', { error: errorInfo });
-
-      Object.keys(components).forEach((key) => {
-        if (
-          !components[key] ||
-          components[key].status === EHealthCheck.UNAVAILABLE
-        ) {
-          components[key] = { status: EHealthCheck.UNAVAILABLE };
-        }
+    } catch (error) {
+      this.logger.error('Health check failed', {
+        message: error instanceof Error ? error.message : String(error),
       });
 
       return { status: EHealthCheck.DOWN, timestamp, components };
+    }
+  }
+
+  private async checkDatabase(): Promise<EHealthCheck> {
+    try {
+      await this.dataSource.query('SELECT 1');
+      return EHealthCheck.UP;
+    } catch {
+      return EHealthCheck.DOWN;
+    }
+  }
+
+  private async checkCpu(): Promise<EHealthCheck> {
+    try {
+      const cpu = await si.currentLoad();
+      return cpu.currentLoad < 90 ? EHealthCheck.UP : EHealthCheck.DOWN;
+    } catch {
+      return EHealthCheck.DOWN;
+    }
+  }
+
+  private async checkMemory(): Promise<EHealthCheck> {
+    try {
+      const mem = await si.mem();
+      return mem.free > 100 * 1024 * 1024 ? EHealthCheck.UP : EHealthCheck.DOWN;
+    } catch {
+      return EHealthCheck.DOWN;
     }
   }
 }

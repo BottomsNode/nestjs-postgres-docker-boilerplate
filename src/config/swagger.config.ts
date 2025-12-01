@@ -1,16 +1,12 @@
 import { DocumentBuilder } from '@nestjs/swagger';
 import { configVariables } from '@shared';
+import { host } from './constant';
 
 export const swaggerConfig = new DocumentBuilder()
-  .setTitle(`${configVariables.database.name} API Documentation`)
-  .setDescription(
-    `${configVariables.database.name} Swagger For API Documentation`,
-  )
-  .setVersion(configVariables.api.version)
-  .addServer(
-    `http://localhost:${configVariables.port}/`,
-    `${configVariables.database.name} Local environment`,
-  )
-  .addTag(`List of ${configVariables.database.name} API's`)
+  .setTitle(configVariables.swagger.title)
+  .setDescription(`${configVariables.swagger.description} API Documentation`)
+  .setVersion(`V${configVariables.swagger.version}`)
+  .addServer(host, `${configVariables.nodeEnv} environment`)
+  .addTag(configVariables.swagger.title)
   .addBearerAuth()
   .build();

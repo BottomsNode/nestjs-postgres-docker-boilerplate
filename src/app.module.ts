@@ -7,12 +7,10 @@ import { AppService } from './app.service';
 import { DatabaseService } from '@config/database-connect.msg';
 import { AppDataSource } from '@config/typeorm.config';
 import { HealthModule } from '@modules/health/health.module';
-import { LoggerModule } from '@modules/logger';
 import { SharedBaseModule } from '@shared';
 
 @Module({
   imports: [
-    LoggerModule,
     HealthModule,
     TypeOrmModule.forRoot(AppDataSource.options),
     AutomapperModule.forRoot({
