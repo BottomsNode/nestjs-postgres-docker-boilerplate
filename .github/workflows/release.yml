@@ -57,8 +57,16 @@ jobs:
       # ------------------------------
       - name: Install git-cliff
         run: |
-          curl -sS https://raw.githubusercontent.com/orhun/git-cliff/main/install.sh | bash
-          sudo mv cliff /usr/local/bin/git-cliff
+          LATEST=$(curl -s https://api.github.com/repos/orhun/git-cliff/releases/latest \
+            | grep browser_download_url \
+            | grep x86_64-unknown-linux-musl.tar.gz \
+            | cut -d '"' -f 4)
+
+          echo "Downloading: $LATEST"
+          curl -sSL "$LATEST" -o git-cliff.tar.gz
+
+          tar -xzf git-cliff.tar.gz
+          sudo mv git-cliff*/git-cliff /usr/local/bin/git-cliff
 
       - name: Generate changelog
         run: |
