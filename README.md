@@ -28,6 +28,7 @@ Before starting, ensure you have the following installed:
 - **Git** - [Download](https://git-scm.com/)
 
 Verify installations:
+
 ```bash
 node --version
 npm --version
@@ -41,13 +42,14 @@ docker compose version
 
 The project uses three environment files:
 
-| File | Purpose | When to Use |
-|------|---------|-------------|
-| **`.env`** | Local development | Running NestJS locally (outside Docker) |
-| **`.env.docker`** | Docker environment | Running with Docker Compose |
-| **`.example.env`** | Template file | Reference for creating new environment files |
+| File               | Purpose            | When to Use                                  |
+| ------------------ | ------------------ | -------------------------------------------- |
+| **`.env`**         | Local development  | Running NestJS locally (outside Docker)      |
+| **`.env.docker`**  | Docker environment | Running with Docker Compose                  |
+| **`.example.env`** | Template file      | Reference for creating new environment files |
 
 ### 🔐 Environment File Locations
+
 All environment files are located in: `src/environment/`
 
 ---
@@ -55,12 +57,14 @@ All environment files are located in: `src/environment/`
 ## 🎯 Initial Setup
 
 ### Step 1: Clone the Repository
+
 ```bash
 git clone <repository-url>
 cd <project-directory>
 ```
 
 ### Step 2: Install Dependencies
+
 ```bash
 npm install
 # or
@@ -70,12 +74,15 @@ yarn install
 ### Step 3: Set Up Environment Files
 
 #### Option A: Local Development (without Docker for app)
+
 1. Copy the example environment file:
+
 ```bash
 cp src/environment/.example.env src/environment/.env
 ```
 
 2. Edit `src/environment/.env` with your configuration:
+
 ```env
 # ===========================
 # Application Configuration
@@ -114,12 +121,15 @@ SWAGGER_VERSION=1
 ```
 
 #### Option B: Docker Environment
+
 1. Copy the example Docker environment file:
+
 ```bash
 cp src/environment/.example.env src/environment/.env.docker
 ```
 
 2. Edit `src/environment/.env.docker`:
+
 ```env
 # ===========================
 # PostgreSQL Configuration
@@ -146,34 +156,41 @@ PGADMIN_DEFAULT_PASSWORD=postgres
 This runs the NestJS app locally while using Docker for the database only.
 
 #### Step 1: Start Database Services
+
 ```bash
 npm run docker:up:db
 ```
 
 This command:
+
 - Starts PostgreSQL container
 - Starts pgAdmin container
 - Uses configurations from `.env.docker`
 
 #### Step 2: Wait for Database to Initialize
+
 Wait about 10-15 seconds for PostgreSQL to fully start.
 
 #### Step 3: Run Database Migrations
+
 ```bash
 npm run migration:run
 ```
 
 #### Step 4: (Optional) Seed the Database
+
 ```bash
 npm run seed
 ```
 
 #### Step 5: Start the Development Server
+
 ```bash
 npm run start:dev
 ```
 
 The application will be available at:
+
 - **API**: `http://localhost:3535`
 - **Swagger Docs**: `http://localhost:3535/api-docs`
 - **pgAdmin**: `http://localhost:5051`
@@ -196,6 +213,7 @@ docker exec -it <container-name> npm run seed
 ## 🗄 Database Management
 
 ### Accessing pgAdmin
+
 1. Open browser: `http://localhost:5051`
 2. Login with credentials from `.env.docker`:
    - Email: `admin@admin.com`
@@ -210,21 +228,25 @@ docker exec -it <container-name> npm run seed
 ### Managing Migrations
 
 #### Generate a New Migration
+
 ```bash
 npm run migration:generate -- MigrationName
 ```
 
 #### Run Pending Migrations
+
 ```bash
 npm run migration:run
 ```
 
 #### Revert Last Migration
+
 ```bash
 npm run migration:revert
 ```
 
 ### Seeding Data
+
 ```bash
 npm run seed
 ```
@@ -234,6 +256,7 @@ npm run seed
 ## 📜 Available Scripts
 
 ### Development
+
 ```bash
 npm run start:dev          # Start development server with hot-reload
 npm run start:debug        # Start with debugging enabled
@@ -241,18 +264,21 @@ npm run build              # Build the project for production
 ```
 
 ### Production
+
 ```bash
 npm run start:prod         # Run production build
 npm run start              # Alternative production start
 ```
 
 ### Code Quality
+
 ```bash
 npm run lint               # Lint and auto-fix TypeScript files
 npm run format             # Format code with Prettier
 ```
 
 ### Docker
+
 ```bash
 npm run docker:up:db       # Start database services (PostgreSQL + pgAdmin)
 npm run docker:down        # Stop and remove all containers
@@ -260,6 +286,7 @@ npm run docker:logs        # View container logs
 ```
 
 ### Database
+
 ```bash
 npm run migration:generate # Generate new migration
 npm run migration:run      # Run pending migrations
@@ -272,6 +299,7 @@ npm run seed               # Seed database with initial data
 ## 🐛 Troubleshooting
 
 ### Port Already in Use
+
 If you see "port already in use" errors:
 
 ```bash
@@ -285,12 +313,15 @@ kill -9 <PID>
 Or change the port in your `.env` file.
 
 ### Database Connection Failed
+
 1. Ensure Docker containers are running:
+
 ```bash
 docker ps
 ```
 
 2. Check if PostgreSQL is ready:
+
 ```bash
 docker logs <postgres-container-name>
 ```
@@ -298,6 +329,7 @@ docker logs <postgres-container-name>
 3. Verify database credentials match in both `.env` and `.env.docker`
 
 ### Migration Errors
+
 If migrations fail:
 
 ```bash
@@ -313,6 +345,7 @@ npm run migration:run
 ```
 
 ### Docker Build Issues
+
 Clear Docker cache and rebuild:
 
 ```bash
@@ -321,6 +354,7 @@ npm run docker:up:db
 ```
 
 ### Permission Denied (Linux/Mac)
+
 ```bash
 sudo chown -R $USER:$USER .
 ```
