@@ -53,24 +53,28 @@ jobs:
         run: yarn build
 
       # ------------------------------
-      # Auto Changelog Generation
+      # Install git-cliff (LATEST release, correct filter)
       # ------------------------------
       - name: Install git-cliff
         run: |
           LATEST=$(curl -s https://api.github.com/repos/orhun/git-cliff/releases/latest \
-            | grep browser_download_url \
-            | grep x86_64-unknown-linux-musl.tar.gz \
-            | cut -d '"' -f 4)
+            | jq -r '.assets[] | select(.name | test("x86_64-unknown-linux-musl.tar.gz$")) | .browser_download_url')
 
           echo "Downloading: $LATEST"
+
           curl -sSL "$LATEST" -o git-cliff.tar.gz
 
           tar -xzf git-cliff.tar.gz
           sudo mv git-cliff*/git-cliff /usr/local/bin/git-cliff
 
+      # ------------------------------
+      # Generate Changelog
+      # ------------------------------
       - name: Generate changelog
         run: |
           git-cliff --tag ${GITHUB_REF#refs/tags/} > RELEASE_CHANGELOG.md
+          echo "Generated changelog:"
+          cat RELEASE_CHANGELOG.md
 
       # ------------------------------
       # Package Release Files
