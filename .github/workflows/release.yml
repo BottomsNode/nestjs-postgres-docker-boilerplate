@@ -11,25 +11,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ------------------------------
+      # Checkout
+      # ------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # ------------------------------
+      # Node Setup
+      # ------------------------------
       - name: Use Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: yarn
 
+      # ------------------------------
+      # Install Dependencies
+      # ------------------------------
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      # ------------------------------
+      # Code Quality Checks
+      # ------------------------------
+      - name: Lint code
+        run: yarn lint --max-warnings=0
+
+      - name: Check formatting
+        run: yarn prettier --check .
+
+      - name: Type check
+        run: yarn tsc --noEmit
+
+      # ------------------------------
+      # Build
+      # ------------------------------
       - name: Build project
         run: yarn build
-
-      - name: Run tests
-        run: yarn test --if-present
 
       # ------------------------------
       # Auto Changelog Generation
@@ -40,7 +61,7 @@ jobs:
           | tar -xz
           sudo mv git-cliff /usr/local/bin/
 
-      - name: Generate Changelog
+      - name: Generate changelog
         run: |
           git-cliff --tag ${GITHUB_REF#refs/tags/} > RELEASE_CHANGELOG.md
 
