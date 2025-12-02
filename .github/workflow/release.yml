@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-and-release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build project
+        run: yarn build
+
+      - name: Run tests
+        run: yarn test --if-present
+
+      # ------------------------------
+      # Auto Changelog Generation
+      # ------------------------------
+      - name: Install git-cliff
+        run: |
+          curl -sSL https://github.com/orhun/git-cliff/releases/latest/download/git-cliff-Linux-x86_64.tar.gz \
+          | tar -xz
+          sudo mv git-cliff /usr/local/bin/
+
+      - name: Generate Changelog
+        run: |
+          git-cliff --tag ${GITHUB_REF#refs/tags/} > RELEASE_CHANGELOG.md
+
+      # ------------------------------
+      # Package Release Files
+      # ------------------------------
+      - name: Archive build output
+        run: |
+          mkdir -p release
+          cp -r dist release/
+          cp package.json release/
+          cp yarn.lock release/
+          cp RELEASE_CHANGELOG.md release/
+
+      # ------------------------------
+      # Publish GitHub Release
+      # ------------------------------
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: RELEASE_CHANGELOG.md
+          files: |
+            release/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

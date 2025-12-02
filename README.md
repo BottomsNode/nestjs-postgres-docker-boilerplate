@@ -1,5 +1,7 @@
 # 🚀 NestJS Project Setup Guide
 
+![Project Cover](assets/cover.png)
+
 Complete step-by-step instructions to set up and run the NestJS boilerplate project.
 
 ---
